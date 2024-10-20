@@ -1,5 +1,6 @@
 // Login.js
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -24,6 +25,9 @@ const Login = () => {
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold text-pink-500">cook</h1>
         </div>
+
+
+
         <form onSubmit={handleSubmit}>
         <div className="mb-4">
             <h1 className='text-black font-semibold text-2xl'>Login</h1>
@@ -56,8 +60,9 @@ const Login = () => {
           <button type="submit" className="w-full bg-pink-500 text-white py-2 rounded-md hover:bg-pink-600 focus:outline-none">SIGN IN</button>
           {error && <p className="text-red-500 text-sm mt-4 text-center">Your password or username is incorrect</p>}
         </form>
+        
         <p className="text-gray-600 text-sm mt-6 text-center">
-          Don't have an account? <a href="#" className="text-pink-500">Create an account</a>
+          Don't have an account? <Link to="/register" className="text-pink-500">Create an account</Link> {/* Updated link */}
         </p>
       </div>
     </div>
