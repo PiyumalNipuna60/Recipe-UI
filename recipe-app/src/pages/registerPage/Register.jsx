@@ -34,8 +34,8 @@ const Register = () => {
             noValidate
             autoComplete="off"
           >
-             <div className="mb-4 ml-6 text-left">
-            <h1 className="text-black font-semibold text-2xl">Register</h1>
+             <div className="mb-4 ml-2 text-left">
+            <h1 className="text-blac kfont-semibold text-2xl">Register</h1>
           </div>
 
             <div>
@@ -98,7 +98,7 @@ const Register = () => {
 
           <button
             type="submit"
-            className="w-1/4 ml-8 bg-pink-500 text-white py-2 rounded-md hover:bg-pink-600 focus:outline-none float-left"
+            className="w-1/4 ml-2 bg-pink-500 text-white py-2 rounded-md hover:bg-pink-600 focus:outline-none float-left"
           >
             Create Account
           </button>
