@@ -2,24 +2,77 @@
 import React, { useState } from "react";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom';
+import api from "../../util/baseURL";
 
 const Register = () => {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [contact, setContact] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordTwo, setPasswordTwo] = useState("");
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  console.log(firstName);
+  console.log(lastName);
+  console.log(contact)
+  
+
+  const handleSubmit = async (e) => {
+    console.log("one");
+    
     e.preventDefault();
-    if (!email || !password) {
-      setError("Please enter a password");
-    } else if (email !== "john@gmail.com" || password !== "1234") {
-      setError("Your password or username is incorrect");
-    } else {
-      setError("");
-      alert("Login successful!");
+
+    if (!email || !password || !passwordTwo) {
+      setError("Please enter both email and password.");
+      return;
+    }
+
+    if (password != passwordTwo) {
+      setError("Comform password not match!.");
+      return;
+    }
+
+    setError("");
+
+    try {
+      const response = await api.post("/auth/register", {
+        firstName,
+        lastName,
+        email,
+        contact,
+        password,
+      });
+
+      if (response.status === 200) {
+        setError("");
+        alert("User Register successful!");
+        navigate("/login"); // Redirect to dashboard or any other page
+      }
+    } catch (error) {
+      if (error.response && error.response.status === 401) {
+        setError("Your email or password is incorrect.");
+        alert(error);
+      } else {
+        setError("Something went wrong. Please try again later.");
+        alert("Something went wrong. Please try again later.!");
+      }
     }
   };
+
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+  //   if (!email || !password) {
+  //     setError("Please enter a password");
+  //   } else if (email !== "john@gmail.com" || password !== "1234") {
+  //     setError("Your password or username is incorrect");
+  //   } else {
+  //     setError("");
+  //     alert("Login successful!");
+  //   }
+  // };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-2">
@@ -44,18 +97,18 @@ const Register = () => {
                 className="px-4 py-2 border border-gray-300 rounded-md focus:ring-pink-500 focus:border-pink-500"
                 id="outlined-required"
                 label="your name"
-                defaultValue="Frist name"
+                placeholder="Frist name"
                 size="small"
-                inputProps={{ style: { fontSize: 12 } }}
+                onChange={(e)=>setFirstName(e.target.value)}
               />
 
               <TextField
                 required
                 className="px-4 py-2 border border-gray-300 rounded-md focus:ring-pink-500 focus:border-pink-500"
                 id="outlined-required"
-                defaultValue="Frist name"
+                placeholder="Last name"
                 size="small"
-                inputProps={{ style: { fontSize: 12 } }}
+                onChange={(e)=>setLastName(e.target.value)}
               />
 
               <TextField
@@ -63,9 +116,9 @@ const Register = () => {
                 className="px-4 py-2 border border-gray-300 rounded-md focus:ring-pink-500 focus:border-pink-500"
                 id="outlined-required"
                 label="Email"
-                defaultValue="abc@gmail.com"
+                placeholder="abc@gmail.com"
                 size="small"
-                inputProps={{ style: { fontSize: 12 } }}
+                onChange={(e)=>setEmail(e.target.value)}
               />
 
               <TextField
@@ -73,9 +126,9 @@ const Register = () => {
                 className="px-4 py-2 border border-gray-300 rounded-md focus:ring-pink-500 focus:border-pink-500"
                 id="outlined-required"
                 label="Phone number"
-                defaultValue="0112222333"
+                placeholder="0112222333"
                 size="small"
-                inputProps={{ style: { fontSize: 12 } }}
+                onChange={(e)=>setContact(e.target.value)}
               />
 
               <TextField
@@ -84,6 +137,7 @@ const Register = () => {
                 type="password"
                 autoComplete="current-password"
                 size="small"
+                onChange={(e)=>setPassword(e.target.value)}
               />
 
               <TextField
@@ -92,21 +146,23 @@ const Register = () => {
                 type="password"
                 autoComplete="current-password"
                 size="small"
+                onChange={(e)=>setPasswordTwo(e.target.value)}
               />
+              <div className="text-right text-xs mr-2 text-red-600">
+                <span>
+                {error}
+                </span>
+              </div>
             </div>
           </Box>
 
           <button
             type="submit"
             className="w-1/4 ml-2 bg-pink-500 text-white py-2 rounded-md hover:bg-pink-600 focus:outline-none float-left"
+            onClick={handleSubmit}
           >
             Create Account
           </button>
-          {error && (
-            <p className="text-red-500 text-sm mt-4 text-center">
-              Your password or username is incorrect
-            </p>
-          )}
      
      <div>
         <br />

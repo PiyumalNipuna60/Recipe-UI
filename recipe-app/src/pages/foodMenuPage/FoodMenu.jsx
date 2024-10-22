@@ -1,30 +1,38 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Button from "@mui/material/Button";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const FoodMenu = () => {
   const [category, setCategory] = useState("pork");
   const navigate = useNavigate(); // For navigation
-
-  // Categories and items with unique ids
-  const categories = ["pork", "Beef", "Chicken", "Lamb", "pasta"];
-  const items = [
-    { id: 1, category: "pork", name: "BBQ Pork Ribs" },
-    { id: 2, category: "pork", name: "Honey Garlic Pork Chops" },
-    { id: 3, category: "Beef", name: "Beef Steak" },
-    { id: 4, category: "Beef", name: "Beef Stroganoff" },
-    { id: 5, category: "Chicken", name: "Chicken Noodle Soup" },
-    { id: 6, category: "Chicken", name: "Chicken Alfredo" },
-    { id: 7, category: "Lamb", name: "Lamb Curry" },
-    { id: 8, category: "pasta", name: "Spaghetti Carbonara" },
-    { id: 9, category: "pasta", name: "Fettuccine Alfredo" },
-  ];
-
-  // State to keep track of favorited items
+  const [items, setItems] = useState([]); // State to hold food items
   const [favorites, setFavorites] = useState([]);
+  const categories = ["pork", "Beef", "Chicken", "Lamb", "pasta", "Dessert"];
+
+  // Function to fetch categories from the API
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8000/api/categories/getAll"
+      );
+
+      if (response.data && Array.isArray(response.data)) {
+        setItems(response.data); // Setting the fetched items
+      } else {
+        console.error("Invalid response format", response);
+      }
+    } catch (error) {
+      console.error("Error fetching categories", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
   // Toggle favorite status
   const toggleFavorite = (id) => {
@@ -36,7 +44,7 @@ const FoodMenu = () => {
   };
 
   // Filter items based on selected category
-  const filteredItems = items.filter((item) => item.category === category);
+  const filteredItems = items.filter((item) => item.strCategory === category);
 
   // Function to navigate to login page
   const handleLogout = () => {
@@ -46,24 +54,26 @@ const FoodMenu = () => {
   return (
     <div className="bg-pink-50 p-6 min-h-screen">
       {/* Header */}
-      <header className="flex  justify-between items-center mb-8">
+      <header className="flex justify-between items-center mb-8">
         <h1 className="text-4xl font-bold text-pink-500 mb-4">cook</h1>
-        <nav >
+        <nav>
           <Button variant="text" className="text-black font-bold">
             HOME
           </Button>
-          <Button href="favourite" variant="text" className="text-black font-bold">
+          <Button
+            href="favourite"
+            variant="text"
+            className="text-black font-bold"
+          >
             FAVOURITE
           </Button>
-          {/* Exit Icon */}
-          
         </nav>
         <div className="justify-end">
           <ExitToAppIcon
             className="cursor-pointer text-black"
             onClick={handleLogout} // Calls the function to go to login page
           />
-          </div>
+        </div>
       </header>
 
       {/* Category Buttons */}
@@ -88,25 +98,36 @@ const FoodMenu = () => {
       <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-10">
         {filteredItems.length > 0 ? (
           filteredItems.map((item) => (
-            <div key={item.id} className="text-center">
-              {/* Placeholder Image */}
-              <div className="bg-gray-300 h-40 w-full rounded-lg mb-4"></div>
+            <div key={item.idCategory} className="text-center">
+              {/* Category Image */}
+              {/* Category Image */}
+              <img
+                src={item.strCategoryThumb}
+                alt={item.strCategory}
+                className="h-40 w-full object-cover rounded-lg mb-4"
+                style={{
+                  objectFit: "cover",
+                  borderRadius: "8px",
+                }}
+              />
 
               {/* Category and Food Name */}
               <p className="text-gray-500 flex justify-center items-center">
-                {category}
+                {item.strCategory}
                 <span
                   className="ml-2 cursor-pointer"
-                  onClick={() => toggleFavorite(item.id)}
+                  onClick={() => toggleFavorite(item.idCategory)}
                 >
-                  {favorites.includes(item.id) ? (
+                  {favorites.includes(item.idCategory) ? (
                     <FavoriteIcon className="text-red-500" />
                   ) : (
                     <FavoriteBorderIcon className="text-pink-500" />
                   )}
                 </span>
               </p>
-              <p className="font-bold text-black mt-1">{item.name}</p>
+              <p className="font-bold text-black mt-1">
+                {item.strCategoryDescription}
+              </p>
             </div>
           ))
         ) : (
