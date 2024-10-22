@@ -14,15 +14,9 @@ const Register = () => {
   const [passwordTwo, setPasswordTwo] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
-
-  console.log(firstName);
-  console.log(lastName);
-  console.log(contact)
   
 
   const handleSubmit = async (e) => {
-    console.log("one");
-    
     e.preventDefault();
 
     if (!email || !password || !passwordTwo) {
@@ -30,7 +24,7 @@ const Register = () => {
       return;
     }
 
-    if (password != passwordTwo) {
+    if (password !== passwordTwo) {
       setError("Comform password not match!.");
       return;
     }
@@ -61,18 +55,6 @@ const Register = () => {
       }
     }
   };
-
-  // const handleSubmit = (e) => {
-  //   e.preventDefault();
-  //   if (!email || !password) {
-  //     setError("Please enter a password");
-  //   } else if (email !== "john@gmail.com" || password !== "1234") {
-  //     setError("Your password or username is incorrect");
-  //   } else {
-  //     setError("");
-  //     alert("Login successful!");
-  //   }
-  // };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-2">

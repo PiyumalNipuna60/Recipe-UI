@@ -4,24 +4,24 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../util/baseURL";
 
 const FoodMenu = () => {
   const [category, setCategory] = useState("pork");
   const navigate = useNavigate(); // For navigation
   const [items, setItems] = useState([]); // State to hold food items
   const [favorites, setFavorites] = useState([]);
-  const categories = ["pork", "Beef", "Chicken", "Lamb", "pasta", "Dessert"];
+  const [categories, setCategories] = useState([]);
+  //const categories = ["pork", "Beef", "Chicken", "Lamb", "pasta", "Dessert"];
 
   // Function to fetch categories from the API
   const fetchCategories = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:8000/api/categories/getAll"
-      );
+      const response = await api.get( "/categories/getAll");
 
       if (response.data && Array.isArray(response.data)) {
-        setItems(response.data); // Setting the fetched items
+        setItems(response.data);
+        setCategoriesData(response.data);
       } else {
         console.error("Invalid response format", response);
       }
@@ -30,9 +30,51 @@ const FoodMenu = () => {
     }
   };
 
+
+  const setCategoriesData = (data) => {
+    const uniqueCategories = [...new Set(data.map(item => item.strCategory))];
+    setCategories(uniqueCategories);
+  };
+ 
+
+
+  const likeFavourite = async (item) => {
+    try {
+      const response = await api.post("/favorites/save",{
+          idCategory:item.idCategory,
+          strCategory:item.strCategory,
+          strCategoryThumb:item.strCategoryThumb,
+          strCategoryDescription:item.strCategoryDescription
+      });
+
+      if (response.status !== 201) {
+        console.error("Invalid response format", response);
+      } 
+    } catch (error) {
+      console.error("Error fetching categories", error);
+    }
+  };
+
+
+
+  const UnLikeFavourite = async (itemId) => {
+    try {
+      const response = await api.delete(`/favorites/${itemId}`);
+
+      if (response.status === 200) {
+        setFavorites((prevFavorites) => prevFavorites.filter((id) => id !== itemId));
+        console.log("Category removed from favorites");
+      } else {
+        console.error("Failed to remove category from favorites", response);
+      }
+    } catch (error) {
+      console.error("Error removing category from favorites", error);
+    }
+  };
+
   useEffect(() => {
     fetchCategories();
-  }, []);
+  },);
 
   // Toggle favorite status
   const toggleFavorite = (id) => {
@@ -54,7 +96,7 @@ const FoodMenu = () => {
   return (
     <div className="bg-pink-50 p-6 min-h-screen">
       {/* Header */}
-      <header className="flex justify-between items-center mb-8">
+      <header className="flex justify-between items-center mb-4">
         <h1 className="text-4xl font-bold text-pink-500 mb-4">cook</h1>
         <nav>
           <Button variant="text" className="text-black font-bold">
@@ -77,7 +119,7 @@ const FoodMenu = () => {
       </header>
 
       {/* Category Buttons */}
-      <div className="flex justify-center space-x-4 mb-8 rounded-sm">
+      <div className="flex justify-center space-x-2 rounded-sm  bg-pink-100 p-5">
         {categories.map((cat) => (
           <Button
             key={cat}
@@ -87,6 +129,7 @@ const FoodMenu = () => {
               backgroundColor: cat === category ? "#ff5c8d" : "transparent",
               color: cat === category ? "#fff" : "#ff5c8d",
               borderColor: "#ff5c8d",
+              borderRadius: "20px",
             }}
           >
             {cat}
@@ -95,16 +138,14 @@ const FoodMenu = () => {
       </div>
 
       {/* Food Items Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-10">
+      <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-10  bg-pink-100 p-5">
         {filteredItems.length > 0 ? (
           filteredItems.map((item) => (
-            <div key={item.idCategory} className="text-center">
-              {/* Category Image */}
-              {/* Category Image */}
+            <div key={item.idCategory} className="text-center w-full rounded-lg mb-4">
               <img
                 src={item.strCategoryThumb}
                 alt={item.strCategory}
-                className="h-40 w-full object-cover rounded-lg mb-4"
+                className="h-40 w-full object-cover rounded-lg mb-4 bg-gray-300 " 
                 style={{
                   objectFit: "cover",
                   borderRadius: "8px",
@@ -119,9 +160,15 @@ const FoodMenu = () => {
                   onClick={() => toggleFavorite(item.idCategory)}
                 >
                   {favorites.includes(item.idCategory) ? (
-                    <FavoriteIcon className="text-red-500" />
+                    <FavoriteIcon
+                    onClick={() => UnLikeFavourite(item.idCategory)}
+                      className="text-red-500"
+                    />
                   ) : (
-                    <FavoriteBorderIcon className="text-pink-500" />
+                    <FavoriteBorderIcon
+                    onClick={() => likeFavourite(item)}
+                      className="text-pink-500"
+                    />
                   )}
                 </span>
               </p>
