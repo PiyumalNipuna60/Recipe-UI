@@ -27,7 +27,10 @@ const Login = () => {
 
       if (response.status === 200) {
         setError("");
-        setSuccess("Login successful!");
+        setSuccess("success");
+        <Stack sx={{ width: "100%" }} spacing={2}>
+           <Alert severity="success">{success}</Alert>
+        </Stack>
         localStorage.setItem("token", response.data.token);
         navigate("/home"); // Redirect to home or dashboard
       }

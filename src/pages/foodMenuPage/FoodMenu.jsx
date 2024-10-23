@@ -7,13 +7,12 @@ import { useNavigate } from "react-router-dom";
 import api from "../../util/baseURL";
 
 const FoodMenu = () => {
-  const [category, setCategory] = useState("pork");
+  const [category, setCategory] = useState("Beef");
   const navigate = useNavigate(); // For navigation
   const [items, setItems] = useState([]); // State to hold food items
   const [favorites, setFavorites] = useState([]);
   const [categories, setCategories] = useState([]);
-  //const categories = ["pork", "Beef", "Chicken", "Lamb", "pasta", "Dessert"];
-
+  
   // Function to fetch categories from the API
   const fetchCategories = async () => {
     try {
