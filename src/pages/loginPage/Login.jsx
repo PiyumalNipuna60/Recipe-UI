@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../../util/baseURL";
-import AlertMessage from "../../components/AlertMessage"; // Import your new component
+import Alert from "@mui/material/Alert";
+import Stack from "@mui/material/Stack";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -47,14 +48,24 @@ const Login = () => {
           <h1 className="text-3xl font-bold text-pink-500">cook</h1>
         </div>
 
-        {/* Show success or error alerts */}
-        <AlertMessage message={success} severity="success" />
-        <AlertMessage message={error} severity="error" />
-
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <h1 className="text-black font-semibold text-2xl">Login</h1>
           </div>
+
+          {/* Display success alert */}
+          {success && (
+            <Stack sx={{ width: "100%" }} spacing={2}>
+              <Alert severity="success">{success}</Alert>
+            </Stack>
+          )}
+
+          {/* Display error alert */}
+          {error && (
+            <Stack sx={{ width: "100%" }} spacing={2}>
+              <Alert severity="error">{error}</Alert>
+            </Stack>
+          )}
 
           <div className="mb-4">
             <label htmlFor="email" className="block text-gray-700 mb-2">
