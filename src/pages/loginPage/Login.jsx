@@ -35,7 +35,7 @@ const Login = () => {
         alert("Your email or password is incorrect.!");
       } else {
         setError("Something went wrong. Please try again later.");
-        alert("Something went wrong. Please try again later.!");
+        alert("Something went wrong. Please try again later.! "+error);
       }
     }
   };
