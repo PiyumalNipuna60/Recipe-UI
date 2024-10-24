@@ -2,18 +2,19 @@ import React, { useState, useEffect } from "react";
 import Button from "@mui/material/Button";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+import Snackbar from "@mui/material/Snackbar"; // Import Snackbar
 import { useNavigate } from "react-router-dom"; 
 import api from "../../util/baseURL";
 
 const FoodFavourite = () => {
   const navigate = useNavigate(); 
   const [items, setItems] = useState([]);
-  const [setFavorites] = useState([]);
-
+  const [favorites, setFavorites] = useState([]);
+  const [openSnackbar, setOpenSnackbar] = useState(false); // State for Snackbar
 
   const fetchCategories = async () => {
     try {
-      const response = await api.get( "/favorites/getAll");
+      const response = await api.get("/favorites/getAll");
 
       if (response.data && Array.isArray(response.data)) {
         setItems(response.data);
@@ -25,7 +26,6 @@ const FoodFavourite = () => {
     }
   };
 
-
   const UnLikeFavourite = async (itemId) => {
     try {
       const response = await api.delete(`/favorites/${itemId}`);
@@ -33,6 +33,8 @@ const FoodFavourite = () => {
       if (response.status === 200) {
         setFavorites((prevFavorites) => prevFavorites.filter((id) => id !== itemId));
         console.log("Category removed from favorites");
+        setOpenSnackbar(true); // Show Snackbar on success
+        fetchCategories();
       } else {
         console.error("Failed to remove category from favorites", response);
       }
@@ -45,10 +47,14 @@ const FoodFavourite = () => {
     fetchCategories();
   }, []);
 
-
   // Function to navigate to login page
   const handleLogout = () => {
     navigate("/login");
+  };
+
+  // Close Snackbar
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
   };
 
   return (
@@ -63,16 +69,14 @@ const FoodFavourite = () => {
           <Button variant="text" className="text-black font-bold">
             FAVOURITE
           </Button>
-          {/* Exit Icon */}
         </nav>
         <div className="justify-end">
           <ExitToAppIcon
             className="cursor-pointer text-black"
-            onClick={handleLogout} // Calls the function to go to login page
+            onClick={handleLogout}
           />
         </div>
       </header>
-
 
       {/* Food Items Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-10 bg-pink-100 p-5">
@@ -80,26 +84,23 @@ const FoodFavourite = () => {
           items.map((item) => (
             <div key={item.idCategory} className="text-center">
               <div className="bg-gray-300 h-40 w-full rounded-lg mb-4">
-              <img
-                src={item.strCategoryThumb}
-                alt={item.strCategory}
-                className="h-40 w-full object-cover rounded-lg mb-4"
-                style={{
-                  objectFit: "cover",
-                  borderRadius: "8px",
-                }}
-              />
+                <img
+                  src={item.strCategoryThumb}
+                  alt={item.strCategory}
+                  className="h-40 w-full object-cover rounded-lg mb-4"
+                  style={{
+                    objectFit: "cover",
+                    borderRadius: "8px",
+                  }}
+                />
               </div>
-
-              {/* Category and Food Name */}
               <p className="text-gray-500 flex justify-center items-center">
                 {item.strCategory}
-                <span
-                  className="ml-2 cursor-pointer"
-                >
+                <span className="ml-2 cursor-pointer">
                   <FavoriteIcon
-                  onClick={() => UnLikeFavourite(item.idCategory)}
-                   className="text-red-500" />
+                    onClick={() => UnLikeFavourite(item.idCategory)}
+                    className="text-red-500"
+                  />
                 </span>
               </p>
               <p className="font-bold text-black mt-1">{item.strCategoryDescription}</p>
@@ -111,6 +112,14 @@ const FoodFavourite = () => {
           </p>
         )}
       </div>
+
+      {/* Snackbar for Unliking */}
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+        message="Category removed from favorites"
+      />
     </div>
   );
 };

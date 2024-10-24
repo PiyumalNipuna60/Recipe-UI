@@ -3,20 +3,22 @@ import Button from "@mui/material/Button";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+import Snackbar from "@mui/material/Snackbar"; // Import Snackbar
 import { useNavigate } from "react-router-dom";
 import api from "../../util/baseURL";
 
 const FoodMenu = () => {
   const [category, setCategory] = useState("Beef");
-  const navigate = useNavigate(); // For navigation
-  const [items, setItems] = useState([]); // State to hold food items
+  const navigate = useNavigate();
+  const [items, setItems] = useState([]);
   const [favorites, setFavorites] = useState([]);
   const [categories, setCategories] = useState([]);
-  
-  // Function to fetch categories from the API
+  const [snackbarMessage, setSnackbarMessage] = useState(""); // Snackbar message
+  const [openSnackbar, setOpenSnackbar] = useState(false); // Snackbar visibility
+
   const fetchCategories = async () => {
     try {
-      const response = await api.get( "/categories/getAll");
+      const response = await api.get("/categories/getAll");
 
       if (response.data && Array.isArray(response.data)) {
         setItems(response.data);
@@ -29,40 +31,41 @@ const FoodMenu = () => {
     }
   };
 
-
   const setCategoriesData = (data) => {
-    const uniqueCategories = [...new Set(data.map(item => item.strCategory))];
+    const uniqueCategories = [...new Set(data.map((item) => item.strCategory))];
     setCategories(uniqueCategories);
   };
- 
-
 
   const likeFavourite = async (item) => {
     try {
-      const response = await api.post("/favorites/save",{
-          idCategory:item.idCategory,
-          strCategory:item.strCategory,
-          strCategoryThumb:item.strCategoryThumb,
-          strCategoryDescription:item.strCategoryDescription
+      const response = await api.post("/favorites/save", {
+        idCategory: item.idCategory,
+        strCategory: item.strCategory,
+        strCategoryThumb: item.strCategoryThumb,
+        strCategoryDescription: item.strCategoryDescription,
       });
 
-      if (response.status !== 201) {
+      if (response.status === 201) {
+        setSnackbarMessage("Added to favorites");
+        setOpenSnackbar(true); // Show Snackbar for added favorite
+      } else {
         console.error("Invalid response format", response);
-      } 
+      }
     } catch (error) {
-      console.error("Error fetching categories", error);
+      console.error("Error adding to favorites", error);
     }
   };
-
-
 
   const UnLikeFavourite = async (itemId) => {
     try {
       const response = await api.delete(`/favorites/${itemId}`);
 
       if (response.status === 200) {
-        setFavorites((prevFavorites) => prevFavorites.filter((id) => id !== itemId));
-        console.log("Category removed from favorites");
+        setFavorites((prevFavorites) =>
+          prevFavorites.filter((id) => id !== itemId)
+        );
+        setSnackbarMessage("Removed from favorites");
+        setOpenSnackbar(true); // Show Snackbar for removed favorite
       } else {
         console.error("Failed to remove category from favorites", response);
       }
@@ -73,9 +76,8 @@ const FoodMenu = () => {
 
   useEffect(() => {
     fetchCategories();
-  },);
+  }, []);
 
-  // Toggle favorite status
   const toggleFavorite = (id) => {
     setFavorites((prevFavorites) =>
       prevFavorites.includes(id)
@@ -84,12 +86,15 @@ const FoodMenu = () => {
     );
   };
 
-  // Filter items based on selected category
   const filteredItems = items.filter((item) => item.strCategory === category);
 
-  // Function to navigate to login page
   const handleLogout = () => {
-    navigate("/login"); // Redirect to login page
+    navigate("/login");
+  };
+
+  // Close the Snackbar
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
   };
 
   return (
@@ -112,13 +117,13 @@ const FoodMenu = () => {
         <div className="justify-end">
           <ExitToAppIcon
             className="cursor-pointer text-black"
-            onClick={handleLogout} // Calls the function to go to login page
+            onClick={handleLogout}
           />
         </div>
       </header>
 
       {/* Category Buttons */}
-      <div className="flex justify-center space-x-2 rounded-sm  bg-pink-100 p-5">
+      <div className="flex justify-center space-x-2 rounded-sm bg-pink-100 p-5">
         {categories.map((cat) => (
           <Button
             key={cat}
@@ -137,21 +142,20 @@ const FoodMenu = () => {
       </div>
 
       {/* Food Items Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-10  bg-pink-100 p-5">
+      <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-10 bg-pink-100 p-5">
         {filteredItems.length > 0 ? (
           filteredItems.map((item) => (
             <div key={item.idCategory} className="text-center w-full rounded-lg mb-4">
               <img
                 src={item.strCategoryThumb}
                 alt={item.strCategory}
-                className="h-40 w-full object-cover rounded-lg mb-4 bg-gray-300 " 
+                className="h-40 w-full object-cover rounded-lg mb-4 bg-gray-300"
                 style={{
                   objectFit: "cover",
                   borderRadius: "8px",
                 }}
               />
 
-              {/* Category and Food Name */}
               <p className="text-gray-500 flex justify-center items-center">
                 {item.strCategory}
                 <span
@@ -160,12 +164,12 @@ const FoodMenu = () => {
                 >
                   {favorites.includes(item.idCategory) ? (
                     <FavoriteIcon
-                    onClick={() => UnLikeFavourite(item.idCategory)}
+                      onClick={() => UnLikeFavourite(item.idCategory)}
                       className="text-red-500"
                     />
                   ) : (
                     <FavoriteBorderIcon
-                    onClick={() => likeFavourite(item)}
+                      onClick={() => likeFavourite(item)}
                       className="text-pink-500"
                     />
                   )}
@@ -182,6 +186,14 @@ const FoodMenu = () => {
           </p>
         )}
       </div>
+
+      {/* Snackbar */}
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+        message={snackbarMessage}
+      />
     </div>
   );
 };
